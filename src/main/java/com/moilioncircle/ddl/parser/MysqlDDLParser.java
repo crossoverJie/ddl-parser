@@ -10,7 +10,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +39,25 @@ public class MysqlDDLParser {
     }
 
     public List<TableElement> parse(String str) throws IOException {
-        return parse(new StringReader(str));
+        StringBuilder sb = compatibleSymbol(str);
+
+        return parse(new StringReader(sb.toString()));
+    }
+
+    /**
+     * compatible "Drop table"
+     * @param str
+     * @return
+     */
+    private StringBuilder compatibleSymbol(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (String value : str.split(";")) {
+            if (!value.trim().startsWith("CREATE TABLE")){
+                continue;
+            }
+            sb.append(value).append(";") ;
+        }
+        return sb;
     }
 
     private void ddls() {
